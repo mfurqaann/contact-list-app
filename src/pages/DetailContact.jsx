@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useContact } from "../context/ContactContext";
 
 import { Button } from "@/components/ui/button";
-import AlertDelete from "./AlertDelete";
+import AlertDelete from "../components/AlertDelete";
 
 function DetailContact() {
   const { id } = useParams();

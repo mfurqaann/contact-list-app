@@ -1,9 +1,9 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import FormData from "./FormData";
 import { useContact } from "../context/ContactContext";
+import FormData from "../components/FormData";
 
-function EditForm() {
+function EditContact() {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -27,4 +27,4 @@ function EditForm() {
   );
 }
 
-export default EditForm;
+export default EditContact;

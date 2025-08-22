@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import FormData from "./FormData";
 import { useContact } from "../context/ContactContext";
+import FormData from "../components/FormData";
 
-function NewForm() {
+function NewContact() {
   const navigate = useNavigate();
 
   const { handleAddContact } = useContact();
@@ -17,4 +17,4 @@ function NewForm() {
   return <FormData isEdit={isEdit} onSubmit={handleSubmit} />;
 }
 
-export default NewForm;
+export default NewContact;

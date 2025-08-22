@@ -24,35 +24,49 @@ export const ContactContext = createContext({
 function contactReducer(state, action) {
   switch (action.type) {
     case "ADD_CONTACT":
-      return { contacts: [action.payload, ...state] };
+      return { ...state, contacts: [action.payload, ...state.contacts] };
     case "INIT_CONTACT":
-      return { contacts: action.payload };
+      return { ...state, contacts: action.payload };
     case "DELETE_CONTACT":
       const deletedContact = state.contacts.filter(
         (contact) => contact.id !== action.payload
       );
-      return { contacts: deletedContact };
+      return { ...state, contacts: deletedContact };
     case "UPDATE_CONTACT":
       const updateContact = state.contacts.map((contact) =>
         contact.id === action.payload.id ? action.payload : contact
       );
 
-      return { contacts: updateContact };
+      return { ...state, contacts: updateContact };
+
+    case "CHECKBOX_GENDER":
+      return {
+        ...state,
+        genders: state.genders.includes(action.payload)
+          ? state.genders.filter((g) => g !== action.payload)
+          : [...state.genders, action.payload],
+      };
+    case "CHECKBOX_NATIONALITY":
+      return {
+        ...state,
+        nationality: state.nationality.includes(action.payload)
+          ? state.nationality.filter((n) => n !== action.payload)
+          : [...state.nationality, action.payload],
+      };
+
     default:
-      return { contacts: [] };
+      return { genders: [], contacts: [] };
   }
 }
 
 export function ContactProvider({ children }) {
-  const [isEdit, setIsEdit] = useState(false);
-  const [contacts, setContacts] = useState([]);
-  const [selectedGenders, setSelectedGenders] = useState([]);
-  const [selectedNationalities, setSelectedNationalities] = useState([]);
   const [countFilter, setCountFilter] = useState(0);
   const [selectPage, setSelectPage] = useState(1);
 
   const [contactsState, contactDispatch] = useReducer(contactReducer, {
     contacts: [],
+    genders: [],
+    nationality: [],
   });
 
   useEffect(() => {
@@ -75,27 +89,20 @@ export function ContactProvider({ children }) {
   }, [selectPage]);
 
   useEffect(() => {
-    const activeFilters = [selectedGenders, selectedNationalities].filter(
-      (arr) => arr.length
-    ).length;
+    const activeFilters = [
+      contactsState.genders,
+      contactsState.nationality,
+    ].filter((arr) => arr.length).length;
 
     setCountFilter(activeFilters);
-  }, [selectedGenders, selectedNationalities]);
+  }, [contactsState.genders, contactsState.nationality]);
 
   const handleCheckboxGender = useCallback((gender) => {
-    setSelectedGenders((prev) =>
-      prev.includes(gender)
-        ? prev.filter((g) => g !== gender)
-        : [...prev, gender]
-    );
+    contactDispatch({ type: "CHECKBOX_GENDER", payload: gender });
   }, []);
 
   const handleCheckboxNationality = useCallback((nationality) => {
-    setSelectedNationalities((prev) =>
-      prev.includes(nationality)
-        ? prev.filter((nat) => nat !== nationality)
-        : [...prev, nationality]
-    );
+    contactDispatch({ type: "CHECKBOX_NATIONALITY", payload: nationality });
   }, []);
 
   function handleDeleteContact(id) {
@@ -113,15 +120,19 @@ export function ContactProvider({ children }) {
   const filteredData = useMemo(() => {
     return contactsState.contacts.filter((contact) => {
       const matchGender =
-        selectedGenders.length === 0 ||
-        selectedGenders.includes(contact.gender.toLowerCase());
+        contactsState.genders.length === 0 ||
+        contactsState.genders.includes(contact.gender.toLowerCase());
       const matchNationality =
-        selectedNationalities.length === 0 ||
-        selectedNationalities.includes(contact.nationality.toLowerCase());
+        contactsState.nationality.length === 0 ||
+        contactsState.nationality.includes(contact.nationality.toLowerCase());
 
       return matchGender && matchNationality;
     });
-  }, [contactsState.contacts, selectedGenders, selectedNationalities]);
+  }, [
+    contactsState.contacts,
+    contactsState.genders,
+    contactsState.nationality,
+  ]);
 
   const ctxValue = {
     contacts: filteredData,
